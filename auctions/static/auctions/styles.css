@@ -1,0 +1,11 @@
+body {
+	padding: 10px;
+}
+
+.listing-images {
+	display: block;
+	max-width: 50%;
+	max-height: 50%;
+	width: auto;
+	height: auto;
+}
