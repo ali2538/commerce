@@ -22,10 +22,10 @@ class Listing(models.Model):
         User, on_delete=models.SET_NULL, related_name='winner', null=True)
     creationDate = models.DateTimeField(auto_now_add=True)
     highestBid = models.DecimalField(max_digits=8, decimal_places=2, null=True)
-    startingBid = models.DecimalField(max_digits=8, decimal_places=2)
+    startingBid = models.DecimalField(max_digits=12, decimal_places=2)
     category = models.CharField(max_length=100)
     auctionOpen = models.BooleanField(default=True)
-    item_image = models.CharField(max_length=2048)
+    item_image = models.CharField(max_length=2048, blank=True)
 
     #     listingsID, createdBy, creationDate, highestBid, strartingBid, minimumRaise, category, auctionOpen, winner
 
