@@ -1,0 +1,39 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+  
+  {% if message %}
+  <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="toast-header">
+      <img src="..." class="rounded mr-2" alt="...">
+      <strong class="mr-auto">Message</strong>
+      <small>11 mins ago</small>
+      <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="toast-body">
+      {{message}}
+    </div>
+  </div>
+  {% endif %}
+  <div class="jumbotron">
+    <h1 class="display-4">{{listing.item_title}}</h1>
+    <img class="card-img-top listing-images" src="{{listing.item_image}}" alt="No Image Available">
+    <p class="lead">{{listing.description}}</p>
+    <hr class="my-4">
+    <p class="h5">Listed by: {{listing.createdBy.username}}</p>
+    <p class="h6">Auction Started On: {{listing.creationDate}}</p>
+    <p class="font-weight-bold">Current Price: <span class="h4">{{listing.highestBid}}</span></p>
+    <p class="h5">Category: {{listing.category}}</p>
+    <form action="{% url 'auctions:listing' listing_id=listing.id %}" method="POST">
+      {% csrf_token %}
+      <div class="form-group">
+        <label for="exampleInputPassword1">Bid</label>
+        <input type="number" class="form-control" name="newBid">
+      </div>
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+  </div>
+      
+{% endblock body %}

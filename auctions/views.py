@@ -73,10 +73,22 @@ def create_listing(request):
         startingBid = request.POST['startingBid']
         category = request.POST['category']
         image_path = request.POST['item_image']
-        listing = Listing(createdBy=request.user, name=title, description=description, startingBid=startingBid,
+        print(f'user isssss {request.user.username}')
+        listing = Listing(createdBy=request.user, item_title=title, description=description, startingBid=startingBid, highestBid=startingBid,
                           category=category, item_image=image_path)
         listing.save()
         return HttpResponseRedirect(reverse('auctions:index'))
 
     else:
         return render(request, 'auctions/newListing.html')
+
+
+def listing(request, listing_id):
+    if request.method == 'POST':
+        pass
+    else:
+        listing_details = Listing.objects.get(pk=listing_id)
+        print(f'I is here -- {listing_details.id}')
+        return render(request, 'auctions/listing.html', {
+            'listing': listing_details
+        })
