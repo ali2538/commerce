@@ -20,11 +20,21 @@
   <div class="jumbotron">
     <h1 class="display-4">{{listing.item_title}}</h1>
     <img class="card-img-top listing-images" src="{{listing.item_image}}" alt="No Image Available">
-    <p class="lead">{{listing.description}}</p>
+    <p class="lead">{{listing.listing.id}}</p>
     <hr class="my-4">
     <p class="h5">Listed by: {{listing.createdBy.username}}</p>
     <p class="h6">Auction Started On: {{listing.creationDate}}</p>
     <p class="font-weight-bold">Current Price: <span class="h4">{{listing.highestBid}}</span></p>
+    
+    {% if user.is_authenticated and watched %}
+    <a class="btn btn-outline-primary {% if user.is_authenticated is not True %}  disabled  {% endif %} " href="{% url 'auctions:add_to_watchlist' listing_id=listing.id %}" 
+    role="button">Remove from Watchlist</a>
+    {% else %}
+    <a class="btn btn-outline-primary {% if user.is_authenticated is not True %}  disabled  {% endif %} " href="{% url 'auctions:add_to_watchlist' listing_id=listing.id %}" 
+    
+       role="button">Add to Watchlist</a>
+    {% endif %}
+      
     <p class="h5">Category: {{listing.category}}</p>
     <form action="{% url 'auctions:listing' listing_id=listing.id %}" method="POST">
       {% csrf_token %}

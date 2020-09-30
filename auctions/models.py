@@ -40,7 +40,7 @@ class Listing(models.Model):
 
 
 class Bid(models.Model):
-    listingId = models.ForeignKey(Listing, on_delete=models.CASCADE)
+    listing = models.ForeignKey(Listing, on_delete=models.CASCADE)
     bidder = models.ForeignKey(
         User, on_delete=models.CASCADE, to_field='username')
     amount = models.DecimalField(max_digits=8, decimal_places=2)
@@ -48,7 +48,7 @@ class Bid(models.Model):
 
 
 class Comment(models.Model):
-    listingId = models.ForeignKey(Listing, on_delete=models.CASCADE)
+    listing = models.ForeignKey(Listing, on_delete=models.CASCADE)
     commentBy = models.ForeignKey(
         User, on_delete=models.CASCADE, to_field='username')
     comment = models.TextField(max_length=5000)
@@ -56,12 +56,12 @@ class Comment(models.Model):
 
 
 class WatchList(models.Model):
-    listingID = models.ForeignKey(Listing, on_delete=models.CASCADE)
+    listing = models.ForeignKey(Listing, on_delete=models.CASCADE)
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, to_field='username')
 
-    # def __str__(self):
-    #     pass
+    def __str__(self):
+        return f'thems are the fields: listing: {self.listing} -- user: {self.user}'
 
     # class Meta:
     #     db_table = ''

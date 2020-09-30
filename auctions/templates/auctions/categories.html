@@ -1,0 +1,22 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+  
+  {% if categories %}
+    <div class="container">
+      <div class="list-group">
+        {% for category in categories %}
+        <a class="list-group-item d-flex justify-content-between align-items-center" href="{% url  'auctions:category' category=category.category %}">
+        {{category.category}}
+        <span class="badge badge-primary badge-pill">{{category.category__count}}</span>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+    {% else %}
+    <div class="container">
+        <h2>No Categories Available</h2>
+    </div>
+  {% endif %}
+      
+{% endblock body %}

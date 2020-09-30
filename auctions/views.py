@@ -1,10 +1,10 @@
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
+from django.db.models import Count
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
-
-from .models import User, Listing
+from .models import User, Listing, WatchList
 
 
 def index(request):
@@ -51,7 +51,10 @@ def register(request):
             return render(request, "auctions/register.html", {
                 "message": "Passwords must match."
             })
-
+        if User.objects.filter(username=username).exists():
+            return render(request, 'auctions/register.html', {
+                "message": 'Username Already Taken'
+            })
         # Attempt to create new user
         try:
             user = User.objects.create_user(username, email, password)
@@ -73,7 +76,6 @@ def create_listing(request):
         startingBid = request.POST['startingBid']
         category = request.POST['category']
         image_path = request.POST['item_image']
-        print(f'user isssss {request.user.username}')
         listing = Listing(createdBy=request.user, item_title=title, description=description, startingBid=startingBid, highestBid=startingBid,
                           category=category, item_image=image_path)
         listing.save()
@@ -88,7 +90,37 @@ def listing(request, listing_id):
         pass
     else:
         listing_details = Listing.objects.get(pk=listing_id)
-        print(f'I is here -- {listing_details.id}')
+        in_watchlist = False
+        if request.user.is_authenticated:
+            if WatchList.objects.filter(user=request.user, listing_id=listing_id):
+                in_watchlist = True
         return render(request, 'auctions/listing.html', {
-            'listing': listing_details
+            'listing': listing_details,
+            'watched': in_watchlist
         })
+
+
+def categories(request):
+    categories = list(Listing.objects.values(
+        'category').order_by().annotate(Count('category')))
+    return render(request, 'auctions/categories.html', {
+        'categories': categories
+    })
+
+
+def category(request, category):
+    listings = Listing.objects.filter(category=category)
+    return render(request, 'auctions/category.html', {
+                  'listings': listings,
+                  'category': category
+                  }
+                  )
+
+
+def add_to_watchlist(request, listing_id):
+    listing = Listing.objects.get(pk=listing_id)
+    watch_item = WatchList(listing=listing, user=request.user)
+    watch_item.save()
+    return HttpResponseRedirect(reverse('auctions:listing', kwargs={
+        'listing_id': listing_id
+    }))
