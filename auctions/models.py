@@ -63,8 +63,5 @@ class WatchList(models.Model):
     def __str__(self):
         return f'thems are the fields: listing: {self.listing} -- user: {self.user}'
 
-    # class Meta:
-    #     db_table = ''
-    #     managed = True
-    #     verbose_name = 'WatchList'
-    #     verbose_name_plural = 'WatchLists'
+    class Meta:
+        unique_together = ['listing', 'user']

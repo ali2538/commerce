@@ -9,9 +9,17 @@ from .models import User, Listing, WatchList
 
 def index(request):
     listings = Listing.objects.all()
-    return render(request, "auctions/index.html", {
-        'listings': listings
-    })
+    if request.user.is_authenticated:
+        user = User.objects.get(username=request.user.username)
+        watched_count = WatchList.objects.filter(user=user).count()
+        return render(request, "auctions/index.html", {
+            'listings': listings,
+            'watched_count': watched_count
+        })
+    else:
+        return render(request, "auctions/index.html", {
+            'listings': listings
+        })
 
 
 def login_view(request):
@@ -118,9 +126,23 @@ def category(request, category):
 
 
 def add_to_watchlist(request, listing_id):
+    print(f'adding stuff === {request.user}')
     listing = Listing.objects.get(pk=listing_id)
-    watch_item = WatchList(listing=listing, user=request.user)
+    user = User.objects.get(username=request.user.username)
+    watch_item = WatchList(listing=listing, user=user)
     watch_item.save()
+    return HttpResponseRedirect(reverse('auctions:listing', kwargs={
+        'listing_id': listing_id
+    }))
+
+
+def remove_from_watchlist(request, listing_id):
+    print(f'removing stuff === {listing_id}')
+    print(f'removing stuff === {type(request.user)}')
+    listing = Listing.objects.get(pk=listing_id)
+    user = User.objects.get(username=request.user.username)
+    watchlist = WatchList.objects.filter(listing=listing, user=user)
+    watchlist.delete()
     return HttpResponseRedirect(reverse('auctions:listing', kwargs={
         'listing_id': listing_id
     }))

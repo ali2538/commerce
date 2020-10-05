@@ -26,15 +26,31 @@
     <p class="h6">Auction Started On: {{listing.creationDate}}</p>
     <p class="font-weight-bold">Current Price: <span class="h4">{{listing.highestBid}}</span></p>
     
-    {% if user.is_authenticated and watched %}
+    <!-- {% if user.is_authenticated and watched %}
     <a class="btn btn-outline-primary {% if user.is_authenticated is not True %}  disabled  {% endif %} " href="{% url 'auctions:add_to_watchlist' listing_id=listing.id %}" 
     role="button">Remove from Watchlist</a>
     {% else %}
     <a class="btn btn-outline-primary {% if user.is_authenticated is not True %}  disabled  {% endif %} " href="{% url 'auctions:add_to_watchlist' listing_id=listing.id %}" 
     
        role="button">Add to Watchlist</a>
-    {% endif %}
+    {% endif %} -->
       
+    {% if user.is_authenticated%}
+      
+      {% if watched %}
+      <a class="btn btn-outline-primary" href="{% url 'auctions:remove_from_watchlist' listing_id=listing.id %}" 
+    role="button">Remove from Watchlist</a>
+        {% else %}
+        <a class="btn btn-outline-primary" href="{% url 'auctions:add_to_watchlist' listing_id=listing.id %}" 
+    role="button">Add to Watchlist</a>
+      {% endif %}
+        
+    
+    {% else %}
+    <a class="btn btn-outline-primary  disabled" href="{% url 'auctions:add_to_watchlist' listing_id=listing.id %} " 
+    
+       role="button" title="Please Sign in First">Add to Watchlist</a>
+    {% endif %}
     <p class="h5">Category: {{listing.category}}</p>
     <form action="{% url 'auctions:listing' listing_id=listing.id %}" method="POST">
       {% csrf_token %}
