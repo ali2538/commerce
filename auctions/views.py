@@ -7,15 +7,24 @@ from django.urls import reverse
 from .models import User, Listing, WatchList
 
 
+def watchlist_count(username):
+    user = User.objects.get(username=username)
+    return WatchList.objects.filter(user=user).count()
+
+
 def index(request):
     listings = Listing.objects.all()
     if request.user.is_authenticated:
-        user = User.objects.get(username=request.user.username)
-        watched_count = WatchList.objects.filter(user=user).count()
-        return render(request, "auctions/index.html", {
-            'listings': listings,
-            'watched_count': watched_count
-        })
+        watched_count = watchlist_count(request.user.username)
+        if watched_count > 0:
+            return render(request, "auctions/index.html", {
+                'listings': listings,
+                'watched_count': watched_count
+            })
+        else:
+            return render(request, "auctions/index.html", {
+                'listings': listings
+            })
     else:
         return render(request, "auctions/index.html", {
             'listings': listings
@@ -90,7 +99,13 @@ def create_listing(request):
         return HttpResponseRedirect(reverse('auctions:index'))
 
     else:
-        return render(request, 'auctions/newListing.html')
+        watched_count = watchlist_count(request.user.username)
+        if watched_count > 0:
+            return render(request, "auctions/newListing.html", {
+                'watched_count': watched_count
+            })
+        else:
+            return render(request, 'auctions/newListing.html')
 
 
 def listing(request, listing_id):
@@ -102,15 +117,29 @@ def listing(request, listing_id):
         if request.user.is_authenticated:
             if WatchList.objects.filter(user=request.user, listing_id=listing_id):
                 in_watchlist = True
-        return render(request, 'auctions/listing.html', {
-            'listing': listing_details,
-            'watched': in_watchlist
-        })
+            watched_count = watchlist_count(request.user.username)
+            if watched_count > 0:
+                return render(request, 'auctions/listing.html', {
+                    'listing': listing_details,
+                    'watched': in_watchlist,
+                    'watched_count': watched_count
+                })
+            return render(request, 'auctions/listing.html', {
+                'listing': listing_details,
+                'watched': in_watchlist
+            })
 
 
 def categories(request):
     categories = list(Listing.objects.values(
         'category').order_by().annotate(Count('category')))
+    if request.user.is_authenticated:
+        watched_count = watchlist_count(request.user.username)
+        if watched_count > 0:
+            return render(request, 'auctions/categories.html', {
+                'categories': categories,
+                'watched_count': watched_count
+            })
     return render(request, 'auctions/categories.html', {
         'categories': categories
     })
@@ -118,15 +147,21 @@ def categories(request):
 
 def category(request, category):
     listings = Listing.objects.filter(category=category)
+    if request.user.is_authenticated:
+        watched_count = watchlist_count(request.user.username)
+        if watched_count > 0:
+            return render(request, 'auctions/category.html', {
+                'listings': listings,
+                'category': category,
+                'watched_count': watched_count
+            })
     return render(request, 'auctions/category.html', {
                   'listings': listings,
                   'category': category
-                  }
-                  )
+                  })
 
 
 def add_to_watchlist(request, listing_id):
-    print(f'adding stuff === {request.user}')
     listing = Listing.objects.get(pk=listing_id)
     user = User.objects.get(username=request.user.username)
     watch_item = WatchList(listing=listing, user=user)
@@ -137,8 +172,6 @@ def add_to_watchlist(request, listing_id):
 
 
 def remove_from_watchlist(request, listing_id):
-    print(f'removing stuff === {listing_id}')
-    print(f'removing stuff === {type(request.user)}')
     listing = Listing.objects.get(pk=listing_id)
     user = User.objects.get(username=request.user.username)
     watchlist = WatchList.objects.filter(listing=listing, user=user)
@@ -146,3 +179,11 @@ def remove_from_watchlist(request, listing_id):
     return HttpResponseRedirect(reverse('auctions:listing', kwargs={
         'listing_id': listing_id
     }))
+
+
+def load_watchlist(request):
+    user = User.objects.get(username=request.user.username)
+    user_watchlist = list(WatchList.objects.filter(user=user))
+    return render(request, 'auctions/watchlist.html', {
+        'watchlist': user_watchlist
+    })
