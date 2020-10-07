@@ -4,7 +4,7 @@ from django.db.models import Count
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
-from .models import User, Listing, WatchList
+from .models import User, Listing, WatchList, Bid
 
 
 def watchlist_count(username):
@@ -109,25 +109,54 @@ def create_listing(request):
 
 
 def listing(request, listing_id):
+    listing_details = Listing.objects.get(pk=listing_id)
+    in_watchlist = False
+    watched_count = 0
+    if request.user.is_authenticated:
+        if WatchList.objects.filter(user=request.user, listing_id=listing_id):
+            in_watchlist = True
+        watched_count = watchlist_count(request.user.username)
     if request.method == 'POST':
-        pass
-    else:
-        listing_details = Listing.objects.get(pk=listing_id)
-        in_watchlist = False
-        if request.user.is_authenticated:
-            if WatchList.objects.filter(user=request.user, listing_id=listing_id):
-                in_watchlist = True
-            watched_count = watchlist_count(request.user.username)
-            if watched_count > 0:
-                return render(request, 'auctions/listing.html', {
-                    'listing': listing_details,
-                    'watched': in_watchlist,
-                    'watched_count': watched_count
-                })
+        bid_amount = float(request.POST['newBid'])
+        if bid_amount <= listing_details.highestBid:
             return render(request, 'auctions/listing.html', {
+                'message': f"New Bid Has to Be Higher than the Current Highest Bid '${listing_details.highestBid}'",
                 'listing': listing_details,
+                'watched_count': watched_count,
                 'watched': in_watchlist
             })
+        else:
+            bidder = User.objects.get(username=request.user.username)
+            new_bid = Bid(listing=listing_details,
+                          bidder=bidder, amount=bid_amount)
+            listing_details.highestBid = bid_amount
+            new_bid.save()
+            print(f'update list ---- {listing_details}')
+            listing_details.save()
+            return render(request, 'auctions/listing.html', {
+                'message': f"New Bid Was Added Successfully and You Are Now the Highest Bidder",
+                'listing': listing_details,
+                'watched_count': watched_count,
+                'watched': in_watchlist
+            })
+            # return HttpResponseRedirect(reverse('auctions:listing', kwargs={
+            #     'message': f"New Bid Was Added Successfully and You Are Now the Highest Bidder",
+            #     'listing': listing_details,
+            #     'watched_count': watched_count,
+            #     'watched': in_watchlist
+            # }))
+
+    else:
+        if watched_count > 0:
+            return render(request, 'auctions/listing.html', {
+                'listing': listing_details,
+                'watched': in_watchlist,
+                'watched_count': watched_count
+            })
+        return render(request, 'auctions/listing.html', {
+            'listing': listing_details,
+            'watched': in_watchlist
+        })
 
 
 def categories(request):

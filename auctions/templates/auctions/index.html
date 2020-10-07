@@ -12,7 +12,7 @@
       <div class="card-body">
       <h5 class="card-title"><a href="{% url 'auctions:listing' listing_id=listing.id %}">{{listing.item_title}}</a></h5>
       <p class="card-text">{{listing.description}}</p>
-      <p class="card-text">${{listing.startingBid}}</p>
+      <p class="card-text">${{listing.highestBid}}</p>
       <p class="card-text"><small class="text-muted">bids go here</small></p>
       </div>
       </div>
