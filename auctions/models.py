@@ -51,8 +51,12 @@ class Comment(models.Model):
     listing = models.ForeignKey(Listing, on_delete=models.CASCADE)
     commentBy = models.ForeignKey(
         User, on_delete=models.CASCADE, to_field='username')
+    comment_title = models.TextField(max_length=100, default='Customer Review')
     comment = models.TextField(max_length=5000)
     commentDate = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'Item: {self.listing} \n User: {self.commentBy} \n Comment Title: {self.comment_title} \n Comment: {self.comment} \n date: {self.commentDate}'
 
 
 class WatchList(models.Model):

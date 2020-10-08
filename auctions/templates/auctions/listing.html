@@ -53,6 +53,46 @@
       </div>
       <button type="submit" class="btn btn-primary">Submit</button>
     </form>
+    <!-- <form action="{% url 'auctions:listing' listing_id=listing.id %}" method="POST">
+      {% csrf_token %}
+      {{new_comment_form}}
+      <div class="form-group">
+        <label for="commentText">Comment</label>
+        <input type="text" id="commentText" class="form-control" name="comment">
+      </div> 
+      <button type="submit" class="btn btn-primary">Submit Comment</button>
+    </form> -->
+ 
   </div>
+  {% if user.is_authenticated%}
+      
+      <a class="btn btn-success btn-lg" href="{% url 'auctions:add_comment' listing_id=listing.id %}" 
+    role="button">Add Comment</a>
+        
+    
+    {% else %}
+    <a class="btn btn-success btn-lg  disabled" href="{% url 'auctions:add_comment' listing_id=listing.id %} " 
+    
+       role="button" title="You Must Login to Leave Comments">Add Comment</a>
+    {% endif %} 
+    
+    {% if comments %}
+    {% for comment in comments %}
+    <div class="list-group">
+      <a href="" class="list-group-item list-group-item-action flex-column align-items-start">
+        <div class="d-flex w-100 justify-content-between">
+          <h5 class="mb-1">{{comment.comment_title}}</h5>
+          <small>{{comment.commentDate}}</small>
+        </div>
+        <p class="mb-1">{{comment.comment}}</p>
+        <small>Comment by: {{comment.commentBy.username}}</small>
+      </a>
+      </div>
+      
+    {% endfor %}  
+    {% else %}
+      <h1 class="display-4">No Comments on This Item Yet</h1>    
+    {% endif %}
+      
       
 {% endblock body %}

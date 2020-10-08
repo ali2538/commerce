@@ -4,7 +4,8 @@ from django.db.models import Count
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
-from .models import User, Listing, WatchList, Bid
+from .models import User, Listing, WatchList, Bid, Comment
+from auctions.forms import NewComment
 
 
 def watchlist_count(username):
@@ -112,6 +113,8 @@ def listing(request, listing_id):
     listing_details = Listing.objects.get(pk=listing_id)
     in_watchlist = False
     watched_count = 0
+    comments = Comment.objects.filter(
+        listing=listing_details).order_by('-commentDate')
     if request.user.is_authenticated:
         if WatchList.objects.filter(user=request.user, listing_id=listing_id):
             in_watchlist = True
@@ -123,6 +126,7 @@ def listing(request, listing_id):
                 'message': f"New Bid Has to Be Higher than the Current Highest Bid '${listing_details.highestBid}'",
                 'listing': listing_details,
                 'watched_count': watched_count,
+                'comments': comments,
                 'watched': in_watchlist
             })
         else:
@@ -137,6 +141,7 @@ def listing(request, listing_id):
                 'message': f"New Bid Was Added Successfully and You Are Now the Highest Bidder",
                 'listing': listing_details,
                 'watched_count': watched_count,
+                'comments': comments,
                 'watched': in_watchlist
             })
             # return HttpResponseRedirect(reverse('auctions:listing', kwargs={
@@ -151,10 +156,12 @@ def listing(request, listing_id):
             return render(request, 'auctions/listing.html', {
                 'listing': listing_details,
                 'watched': in_watchlist,
+                'comments': comments,
                 'watched_count': watched_count
             })
         return render(request, 'auctions/listing.html', {
             'listing': listing_details,
+            'comments': comments,
             'watched': in_watchlist
         })
 
@@ -216,3 +223,26 @@ def load_watchlist(request):
     return render(request, 'auctions/watchlist.html', {
         'watchlist': user_watchlist
     })
+
+
+def add_comment(request, listing_id):
+    listing = Listing.objects.get(pk=listing_id)
+    if request.method == 'POST':
+        user = User.objects.get(username=request.user.username)
+        comment_form = NewComment(request.POST)
+        if comment_form.is_valid():
+            comment_title = comment_form.cleaned_data['new_comment_title']
+            comment_body = comment_form.cleaned_data['new_comment_body']
+            comment = Comment(listing=listing, commentBy=user,
+                              comment=comment_body, comment_title=comment_title)
+            comment.save()
+            return HttpResponseRedirect(reverse('auctions:listing', kwargs={
+                'listing_id': listing_id
+            }))
+
+    else:
+        new_comment_form = NewComment()
+        return render(request, 'auctions/new_comment.html', {
+            'comment_form': new_comment_form,
+            'listing': listing
+        })
