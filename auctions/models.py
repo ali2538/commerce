@@ -36,7 +36,7 @@ class Listing(models.Model):
     #     verbose_name = 'listing'
     #     verbose_name_plural = 'listings'
     def __str__(self):
-        return f'created by: {self.createdBy}, creationDate: {self.creationDate}, category: {self.category}'
+        return f'created by: {self.createdBy}, creationDate: {self.creationDate}, category: {self.category}, open: {self.auctionOpen}'
 
 
 class Bid(models.Model):
@@ -45,6 +45,9 @@ class Bid(models.Model):
         User, on_delete=models.CASCADE, to_field='username')
     amount = models.DecimalField(max_digits=8, decimal_places=2)
     bidDate = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'listing: {self.listing.item_title}, bidder: {self.bidder.username} , amount: {self.amount}'
 
 
 class Comment(models.Model):

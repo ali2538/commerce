@@ -10,6 +10,15 @@
     </button>
   </div>
   {% endif %}
+
+  {% if user.username == listing.winner.username %}
+	 <div class="alert alert-success" role="alert">
+	  <h4 class="alert-heading">You Have Won This Auction</h4>
+	  <p>Your bid has been chosen as the winning bid</p>
+	  <hr>
+	  <p class="mb-0">Please contact {{listing.createdBy.username}} for next steps</p>
+	</div>	
+{% endif %}
   <div class="jumbotron">
     <h1 class="display-4">{{listing.item_title}}</h1>
     <img class="card-img-top listing-images" src="{{listing.item_image}}" alt="No Image Available">
@@ -18,6 +27,7 @@
     <p class="h5">Listed by: {{listing.createdBy.username}}</p>
     <p class="h6">Auction Started On: {{listing.creationDate}}</p>
     <p class="font-weight-bold">Current Price: <span class="h4">{{listing.highestBid}}</span></p>
+    <p class="h5">Category: {{listing.category}}</p>
     
     <!-- {% if user.is_authenticated and watched %}
     <a class="btn btn-outline-primary {% if user.is_authenticated is not True %}  disabled  {% endif %} " href="{% url 'auctions:add_to_watchlist' listing_id=listing.id %}" 
@@ -28,31 +38,49 @@
        role="button">Add to Watchlist</a>
     {% endif %} -->
       
-    {% if user.is_authenticated%}
-      
-      {% if watched %}
-      <a class="btn btn-outline-primary" href="{% url 'auctions:remove_from_watchlist' listing_id=listing.id %}" 
-    role="button">Remove from Watchlist</a>
+    {% if user.is_authenticated %}
+      {% if listing.auctionOpen %}
+        {% if user.username == listing.createdBy.username %}
+          <a class="btn btn-outline-primary" href="{% url 'auctions:close_auction' listing_id=listing.id %}" role="button">Close Auction</a>
         {% else %}
-        <a class="btn btn-outline-primary" href="{% url 'auctions:add_to_watchlist' listing_id=listing.id %}" 
-    role="button">Add to Watchlist</a>
-      {% endif %}
-        
-    
-    {% else %}
-    <a class="btn btn-outline-primary  disabled" href="{% url 'auctions:add_to_watchlist' listing_id=listing.id %} " 
-    
-       role="button" title="Please Sign in First">Add to Watchlist</a>
-    {% endif %}
-    <p class="h5">Category: {{listing.category}}</p>
-    <form action="{% url 'auctions:listing' listing_id=listing.id %}" method="POST">
-      {% csrf_token %}
-      <div class="form-group">
-        <label for="bidAmount">Bid</label>
-        <input type="number" id="bidAmount" class="form-control" name="newBid">
+          {% if watched %}
+              <a class="btn btn-outline-primary" href="{% url 'auctions:remove_from_watchlist' listing_id=listing.id %}" 
+            role="button">Remove from Watchlist</a>
+          {% else %}
+                <a class="btn btn-outline-primary" href="{% url 'auctions:add_to_watchlist' listing_id=listing.id %}" 
+            role="button">Add to Watchlist</a>
+          {% endif %}
+          <form action="{% url 'auctions:listing' listing_id=listing.id %}" method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+              <label for="bidAmount">Bid</label>
+              <input type="number" id="bidAmount" class="form-control" name="newBid">
+            </div>
+      {% if listing.auctionOpen %}
+              <button type="submit" class="btn btn-primary">Submit</button>
+        {% else %}
+  
+              <button type="submit" disabled class="btn btn-secondary">Auction Closed</button>
+  {% endif %}
+          </form>
+        {% endif %}
+	{% else %}
+        	<a class="btn btn-warning" disabled role="button">Auction Closed</a>
+	{% endif %}
+      {% else %}
+      <div class="alert alert-info" role="alert">
+        <h4 class="alert-heading">You Are Not Logged In</h4>
+        <p>You have to log in to leave comments or bid on items</p>
       </div>
-      <button type="submit" class="btn btn-primary">Submit</button>
-    </form>
+	{% endif %}
+         
+       
+    
+ 
+    
+    
+    
+    
     <!-- <form action="{% url 'auctions:listing' listing_id=listing.id %}" method="POST">
       {% csrf_token %}
       {{new_comment_form}}
@@ -64,7 +92,7 @@
     </form> -->
  
   </div>
-  {% if user.is_authenticated%}
+  {% if user.is_authenticated %}
       
       <a class="btn btn-success btn-lg" href="{% url 'auctions:add_comment' listing_id=listing.id %}" 
     role="button">Add Comment</a>
@@ -79,7 +107,7 @@
     {% if comments %}
     {% for comment in comments %}
     <div class="list-group">
-      <a href="" class="list-group-item list-group-item-action flex-column align-items-start">
+      <a class="list-group-item list-group-item-action flex-column align-items-start">
         <div class="d-flex w-100 justify-content-between">
           <h5 class="mb-1">{{comment.comment_title}}</h5>
           <small>{{comment.commentDate}}</small>

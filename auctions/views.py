@@ -246,3 +246,14 @@ def add_comment(request, listing_id):
             'comment_form': new_comment_form,
             'listing': listing
         })
+
+
+def close_auction(request, listing_id):
+    listing = Listing.objects.get(pk=listing_id)
+    listing.auctionOpen = False
+    highestBid = Bid.objects.filter(listing=listing).order_by('-amount')[0]
+    listing.winner = highestBid.bidder
+    listing.save()
+    return HttpResponseRedirect(reverse('auctions:listing', kwargs={
+        'listing_id': listing_id
+    }))
