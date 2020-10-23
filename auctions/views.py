@@ -135,7 +135,6 @@ def listing(request, listing_id):
                           bidder=bidder, amount=bid_amount)
             listing_details.highestBid = bid_amount
             new_bid.save()
-            print(f'update list ---- {listing_details}')
             listing_details.save()
             return render(request, 'auctions/listing.html', {
                 'message': f"New Bid Was Added Successfully and You Are Now the Highest Bidder",
@@ -144,12 +143,6 @@ def listing(request, listing_id):
                 'comments': comments,
                 'watched': in_watchlist
             })
-            # return HttpResponseRedirect(reverse('auctions:listing', kwargs={
-            #     'message': f"New Bid Was Added Successfully and You Are Now the Highest Bidder",
-            #     'listing': listing_details,
-            #     'watched_count': watched_count,
-            #     'watched': in_watchlist
-            # }))
 
     else:
         if watched_count > 0:

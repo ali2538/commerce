@@ -28,15 +28,8 @@ class Listing(models.Model):
     auctionOpen = models.BooleanField(default=True)
     item_image = models.CharField(max_length=2048, blank=True)
 
-    #     listingsID, createdBy, creationDate, highestBid, strartingBid, minimumRaise, category, auctionOpen, winner
-
-    # class Meta:
-    #     """Meta definition for listing."""
-
-    #     verbose_name = 'listing'
-    #     verbose_name_plural = 'listings'
     def __str__(self):
-        return f'created by: {self.createdBy}, creationDate: {self.creationDate}, category: {self.category}, open: {self.auctionOpen}'
+        return f'created by: {self.createdBy.username}, creationDate: {self.creationDate}, category: {self.category}, open: {self.auctionOpen}'
 
 
 class Bid(models.Model):

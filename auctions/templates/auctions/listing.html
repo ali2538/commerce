@@ -29,15 +29,6 @@
     <p class="font-weight-bold">Current Price: <span class="h4">{{listing.highestBid}}</span></p>
     <p class="h5">Category: {{listing.category}}</p>
     
-    <!-- {% if user.is_authenticated and watched %}
-    <a class="btn btn-outline-primary {% if user.is_authenticated is not True %}  disabled  {% endif %} " href="{% url 'auctions:add_to_watchlist' listing_id=listing.id %}" 
-    role="button">Remove from Watchlist</a>
-    {% else %}
-    <a class="btn btn-outline-primary {% if user.is_authenticated is not True %}  disabled  {% endif %} " href="{% url 'auctions:add_to_watchlist' listing_id=listing.id %}" 
-    
-       role="button">Add to Watchlist</a>
-    {% endif %} -->
-      
     {% if user.is_authenticated %}
       {% if listing.auctionOpen %}
         {% if user.username == listing.createdBy.username %}
@@ -74,22 +65,6 @@
       </div>
 	{% endif %}
          
-       
-    
- 
-    
-    
-    
-    
-    <!-- <form action="{% url 'auctions:listing' listing_id=listing.id %}" method="POST">
-      {% csrf_token %}
-      {{new_comment_form}}
-      <div class="form-group">
-        <label for="commentText">Comment</label>
-        <input type="text" id="commentText" class="form-control" name="comment">
-      </div> 
-      <button type="submit" class="btn btn-primary">Submit Comment</button>
-    </form> -->
  
   </div>
   {% if user.is_authenticated %}
