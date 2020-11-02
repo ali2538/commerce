@@ -13,7 +13,13 @@
       <h5 class="card-title"><a href="{% url 'auctions:listing' listing_id=listing.id %}">{{listing.item_title}}</a></h5>
       <p class="card-text">{{listing.description}}</p>
       <p class="card-text">${{listing.startingBid}}</p>
-      <p class="card-text"><small class="text-muted">bids go here</small></p>
+      {% if listing.auctionOpen %}
+        
+        <p class="card-text"><small class="text-muted">Auction Open</small></p>
+        {% else %}
+          <p class="card-text"><small class="text-muted">Auction Closed</small></p>
+
+      {% endif %}
       </div>
       </div>
     {% endfor %}

@@ -14,7 +14,7 @@ def watchlist_count(username):
 
 
 def index(request):
-    listings = Listing.objects.all()
+    listings = Listing.objects.filter(auctionOpen=True)
     if request.user.is_authenticated:
         watched_count = watchlist_count(request.user.username)
         if watched_count > 0:
@@ -134,6 +134,10 @@ def listing(request, listing_id):
             new_bid = Bid(listing=listing_details,
                           bidder=bidder, amount=bid_amount)
             listing_details.highestBid = bid_amount
+            # adding the item also to user's watchlist
+            if WatchList.objects.filter(listing=listing_details).filter(user=bidder).count() == 0:
+                watched = WatchList(listing=listing_details, user=bidder)
+                watched.save()
             new_bid.save()
             listing_details.save()
             return render(request, 'auctions/listing.html', {

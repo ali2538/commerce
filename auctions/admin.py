@@ -1,10 +1,24 @@
 from django.contrib import admin
 from auctions.models import Listing, User, Comment, Bid
+from django.db import models
 
 # Register your models here.
 
 
+def get_highest_bid(listing):
+    return Bid.objects.filter(listing=listing).order_by('-amount')[0].amount
+
+
 class BidAdmin(admin.ModelAdmin):
+    # overriding the delete_selected action to update the listing's highest bid when the bid is deleted through admin channel
+    actions = ['delete_selected']
+
+    def delete_selected(ModelAdmin, request, queryset):
+        listing = Listing.objects.get(pk=queryset[0].listing.id)
+        queryset.delete()
+        listing.highestBid = get_highest_bid(listing)
+        listing.save(update_fields=['highestBid'])
+
     def item_title(self, obj):
         return obj.listing.item_title
 
