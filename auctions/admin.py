@@ -6,7 +6,12 @@ from django.db import models
 
 
 def get_highest_bid(listing):
-    return Bid.objects.filter(listing=listing).order_by('-amount')[0].amount
+    try:
+        highest_bid = Bid.objects.filter(
+            listing=listing).order_by('-amount')[0].amount
+    except IndexError:
+        highest_bid = None
+    return highest_bid
 
 
 class BidAdmin(admin.ModelAdmin):
@@ -16,7 +21,13 @@ class BidAdmin(admin.ModelAdmin):
     def delete_selected(ModelAdmin, request, queryset):
         listing = Listing.objects.get(pk=queryset[0].listing.id)
         queryset.delete()
-        listing.highestBid = get_highest_bid(listing)
+
+        # in case the bid we just deleted in admin console, is the only bid remaining
+        try:
+            listing.highestBid = Bid.objects.filter(
+                listing=listing).order_by('-amount')[0].amount
+        except IndexError:
+            listing.highestBid = listing.startingBid
         listing.save(update_fields=['highestBid'])
 
     def item_title(self, obj):
