@@ -9,3 +9,5 @@
 
 #### About the code
 The site is written using Django framework and uses SQLite database
+
+![commerce_github_gif](https://github.com/ali2538/commerce/assets/29468025/f08a2924-3cb5-4323-9eba-e9f973adecb5)
